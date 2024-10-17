@@ -41,6 +41,75 @@ class CarroDB{
         //fecha a conexao
         connection.end();
     }
-}
+
+    //retorna lista de carros.
+    static getCarrosById(id, callback){
+        let connection = CarroDB.connect();
+        //consulta
+        let sql = "select * from carro where id=?";
+        let query = connection.query(sql, id, function(error, results, fields){
+            if(error){
+                throw error;
+            }
+            if(results.length == 0){
+                console.log("Nenhum carro encontrado");
+            }
+            //encontrou
+            let carro = results[0];
+            callback(carro);
+        });
+        console.log(query.sql);
+        //fecha a conn
+        connection.end();
+    }
+    //salva um carro no banco.
+    //recebe o json com os dados do carro como parametro.
+
+    static save(carro, callback){
+        let connection = CarroDB.connect();
+        //insere
+        let sql = "insert into carro set ? ";
+        let query = connection.query(sql, carro, function(error, results, fields){
+            if(error){
+                throw error;
+            }
+            //atualiza o objeto carro do parametro com o id inserido.
+            carro.id = results.insertId;
+            //retorna o carro pela func de callback.
+            callback(carro);
+        });
+        console.log(query.sql);
+        connection.end();
+    }
+
+    //atualiza um carro no banco de dados
+    static update(carro, callback){
+        let connection = CarroDB.connect();
+        let sql = "update carro set ? where id = ?";
+        //id do carro para atualizar
+        let id = carro.id;
+        let query = connection.query(sql, [carro, id], function(error, results, fields){
+            if(error){
+                throw error;
+            }
+            callback(carro);
+        });
+        console.log(query.sql);
+        connection.end();
+    }
+    //deleta um carro
+    static deleteById(id, callback){
+        let connection = CarroDB.connect();
+        let sql = "delete from carro where id = ?";
+        let query = connection.query(sql, id, function(error, results, fields){
+            if(error){
+                throw error;
+            }
+            callback(results.affectedRows);
+        });
+        console.log(query.sql);
+        connection.end();
+    }
+};
 
 module.exports = CarroDB;
